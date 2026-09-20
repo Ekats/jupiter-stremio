@@ -1,0 +1,31 @@
+services:
+  jupiter:
+    build: .
+    # or: image: ghcr.io/<you>/jupiter-stremio:latest
+    restart: unless-stopped
+    ports:
+      - "7000:7000"
+    volumes:
+      - jupiter-data:/app/data
+    environment:
+      - PORT=7000
+
+  # Stremio requires HTTPS for any addon that is not on localhost, so a remote
+  # install needs a real certificate. Caddy issues and renews one automatically.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - jupiter
+
+volumes:
+  jupiter-data:
+  caddy-data:
+  caddy-config:

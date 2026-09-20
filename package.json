@@ -1,0 +1,22 @@
+{
+  "name": "jupiter-stremio",
+  "version": "0.1.0",
+  "description": "Stremio addon for ERR Jupiter (jupiter.err.ee)",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "index": "node src/indexer.js discover && node src/indexer.js enrich 999999 movie && node src/indexer.js series 999999",
+    "index:discover": "node src/indexer.js discover",
+    "index:films": "node src/indexer.js enrich 999999 movie",
+    "index:series": "node src/indexer.js series 999999",
+    "index:stats": "node src/indexer.js stats"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "stremio-addon-sdk": "^1.6.10"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

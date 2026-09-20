@@ -1,0 +1,6 @@
+# Replace with your own hostname. Caddy obtains and renews the TLS
+# certificate automatically, which is what Stremio needs to accept a
+# remote addon.
+jupiter.example.com {
+	reverse_proxy jupiter:7000
+}
