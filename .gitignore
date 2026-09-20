@@ -1,0 +1,24 @@
+# Not ours — cloned reference addons, study material
+refs/
+
+# Research notes, not documentation of this project
+STUDY.md
+
+# Abandoned static-export path (kept locally, not shipped)
+src/export.js
+dist/
+
+# Built index — regenerate with `npm run index`
+data/
+
+# Node
+node_modules/
+*.log
+
+# Env / secrets
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+*.swp
