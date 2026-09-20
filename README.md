@@ -15,10 +15,15 @@ broadcaster. Films, series, and live TV with a programme guide and catch-up.
 docker compose up -d           # or: npm ci && npm start
 ```
 
-Then open **http://127.0.0.1:7000/** — the page shows the URL to paste into
-Stremio → Addons.
+Paste this into Stremio → Addons:
 
-Needs Node 22+ if running without containers.
+```
+http://127.0.0.1:7000/manifest.json
+```
+
+Needs Node 22+ if running without containers. Opening
+http://127.0.0.1:7000/ in a browser gives the same URL with a copy button,
+which is useful when connecting from another machine.
 
 ## Build the index
 
