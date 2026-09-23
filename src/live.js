@@ -151,12 +151,27 @@ async function liveStream(channel) {
   const media = await getLiveMedia(channel.key);
   const url = absolute(media?.src);
   if (!url) return [];
-  return [{
-    name: 'Jupiter',
-    description: `${channel.name}\nOtse · HLS`,
-    url,
-    behaviorHints: { notWebReady: true, bingeGroup: `jupiter-live-${channel.key}` }
-  }];
+  const bingeGroup = `jupiter-live-${channel.key}`;
+  return [
+    // Played directly by Stremio's player, which follows the manifest's
+    // separate WebVTT subtitle renditions — the same way ERR's own web player
+    // does. The streaming-server path below does not: its probe reports zero
+    // subtitle tracks for this stream.
+    {
+      name: 'Jupiter',
+      description: `${channel.name}\nOtse · HLS`,
+      url,
+      behaviorHints: { bingeGroup }
+    },
+    // Fallback via the local streaming server, for clients that cannot play
+    // HLS directly. No subtitles on this one.
+    {
+      name: 'Jupiter',
+      description: `${channel.name}\nOtse · HLS (server, no subs)`,
+      url,
+      behaviorHints: { notWebReady: true, bingeGroup: `${bingeGroup}-srv` }
+    }
+  ];
 }
 
 /**

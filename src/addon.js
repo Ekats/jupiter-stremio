@@ -1,6 +1,6 @@
 import pkg from 'stremio-addon-sdk';
 import { getCategory, getContent, searchVod, CATEGORY } from './err.js';
-import { toMetaPreview, rowToPreview, toMeta, toSeriesMeta, toStreams, subtitlesFor, toContentId, ID_PREFIX } from './map.js';
+import { toMetaPreview, rowToPreview, toMeta, toSeriesMeta, toStreams, drmStream, subtitlesFor, toContentId, ID_PREFIX } from './map.js';
 import { openDb, listItems, listEpisodes, getItem, genres as indexGenres, stats } from './db.js';
 import { CHANNELS, isChannelId, channelKey, parseLiveId, toChannelPreview, toChannelMeta, toChannelStreams } from './live.js';
 
@@ -35,9 +35,11 @@ async function searchCatalog(viewType, phrase, skip) {
     page: Math.floor(skip / PAGE_SIZE) + 1,
     limit: PAGE_SIZE
   });
-  return items
-    .filter((item) => getItem(item.id)?.drm !== 1)
-    .map(toMetaPreview);
+  return items.map((item) => {
+    const preview = toMetaPreview(item);
+    if (getItem(item.id)?.drm === 1) preview.name = `${preview.name} ↗`;
+    return preview;
+  });
 }
 
 function indexedMovieCount() {
@@ -243,7 +245,14 @@ export async function buildAddon() {
         cacheMaxAge: LIVE_CACHE_AGE
       };
     }
-    const { main } = await getContent(toContentId(id), CATEGORY.video);
+    const contentId = Number(toContentId(id));
+    // DRM titles are Widevine-locked: no Stremio player can play them, so hand
+    // off to ERR's own player. Served straight from the index — no live
+    // upstream fetch that could make this endpoint slow or fragile.
+    if (getItem(contentId)?.drm === 1) {
+      return { streams: drmStream(contentId), cacheMaxAge: STREAM_CACHE_AGE };
+    }
+    const { main } = await getContent(contentId, CATEGORY.video);
     return { streams: toStreams(main), cacheMaxAge: STREAM_CACHE_AGE };
   });
 

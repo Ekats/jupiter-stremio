@@ -102,7 +102,9 @@ export function rowToPreview(row) {
   return clean({
     id: toStremioId(row.id),
     type: row.type === 'series' ? 'series' : 'movie',
-    name: row.heading,
+    // Marked so it is obvious before clicking that this one opens externally
+    // rather than playing in Stremio.
+    name: row.drm ? `${row.heading} ↗` : row.heading,
     poster: row.poster || undefined,
     posterShape: 'poster',
     description: row.lead || undefined,
@@ -177,19 +179,28 @@ export function toSubtitles(media) {
  *   gb/gbsec -> HLS only (the direct MP4 route 403s for this tier)
  *   other    -> direct MP4 (webReady) plus an HLS alternative
  */
+/**
+ * Handoff stream for DRM (Widevine) titles. Stremio has no player that can
+ * acquire a Widevine license, so the only playable action is to open ERR
+ * Jupiter's own player. The URL is derivable from the content id alone, which
+ * lets the stream handler serve this without an upstream fetch.
+ */
+export function drmStream(contentId) {
+  return [{
+    name: 'Jupiter',
+    description: 'DRM-kaitsega sisu — ava ERR Jupiteris\nDRM protected — opens in ERR Jupiter',
+    externalUrl: `https://jupiter.err.ee/${contentId}`
+  }];
+}
+
 export function toStreams(main) {
   const media = main.medias?.[0];
   if (!media) return [];
 
   const folder = media.folder || '';
-  const pageUrl = main.canonicalUrl || `https://jupiter.err.ee/${main.id}`;
 
   if (media.restrictions?.drm || folder === 'drm') {
-    return [{
-      name: 'Jupiter',
-      description: 'DRM-kaitsega sisu — ava ERR Jupiteris\nDRM protected — opens in ERR Jupiter',
-      externalUrl: pageUrl
-    }];
+    return drmStream(main.id);
   }
 
   const geoBlocked = Boolean(media.restrictions?.geoBlock) || folder.startsWith('gb');

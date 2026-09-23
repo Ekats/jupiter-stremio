@@ -157,12 +157,14 @@ export function repairUncheckedRows() {
 }
 
 /**
- * Catalogue query. Known-DRM items are excluded; items not yet enriched are
- * kept, so a partially built index degrades to "shows everything" rather than
- * to an empty catalogue.
+ * Catalogue query.
+ *
+ * DRM titles are listed rather than hidden: they are real catalogue entries
+ * with metadata, and selecting one hands off to ERR's own player. Hiding them
+ * made that handoff unreachable and the catalogue silently incomplete.
  */
 export function listItems({ type = 'movie', genre, search, skip = 0, limit = 100 }) {
-  const where = ['type = ?', '(drm IS NULL OR drm = 0)'];
+  const where = ['type = ?'];
   const params = [type];
 
   if (genre) {
